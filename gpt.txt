@@ -1,0 +1,546 @@
+一、这个项目最后要长什么样
+
+你最终要做出来的东西，尽量包括这几块：
+
+用户能看到的功能
+登录
+车辆列表
+单车详情页
+最新状态：速度、位置、在线/离线、电量
+告警列表：超速、低电量、离线
+历史轨迹或历史状态记录
+简单 dashboard：车辆总数、在线数、告警数
+技术上要体现的点
+后端 API
+SQL 数据库设计
+数据入库
+基本鉴权
+错误处理
+README
+部署
+最好有自动化测试
+二、技术栈建议
+
+为了更贴合你求职方向，我建议你这样配：
+
+推荐组合
+后端：Java + Spring Boot
+数据库：PostgreSQL
+前端：React
+鉴权：JWT
+部署：
+后端：Render / Railway / EC2
+数据库：Neon / Supabase / RDS
+版本管理：GitHub
+API 文档：Swagger/OpenAPI
+可选加分：Docker、GitHub Actions
+
+如果你 Java 不够熟，也可以用：
+
+Python + FastAPI
+但如果你要投 Software Engineer Intern，Spring Boot 会更像企业开发。
+三、数据库先这样设计
+
+你先不要设计太复杂，够用就行。
+
+1. users
+id
+name
+email
+password_hash
+role
+created_at
+2. vehicles
+id
+plate_number
+device_id
+model
+status
+created_at
+3. telemetry_records
+id
+vehicle_id
+latitude
+longitude
+speed
+battery_level
+recorded_at
+4. alerts
+id
+vehicle_id
+alert_type
+message
+severity
+created_at
+resolved
+四、14天开发清单
+
+我按“每天做什么”给你拆开。你照着做就行。
+
+Day 1：定题 + 建仓库 + 写项目框架
+
+今天目标：
+
+把项目方向定下来
+建好 GitHub repo
+初始化前后端项目
+写 README 第一版
+
+你今天要完成：
+
+GitHub 新建仓库：fleet-monitoring-platform
+建两个文件夹：
+backend
+frontend
+后端初始化 Spring Boot 项目
+前端初始化 React 项目
+README 写清楚：
+项目介绍
+技术栈
+计划功能
+当前进度
+
+今天产出：
+
+一个能跑起来的空项目
+GitHub 第一次 commit
+
+commit 示例：
+
+init backend and frontend structure
+add initial README
+Day 2：数据库设计 + 本地环境搭建
+
+今天目标：
+
+把数据结构想清楚
+本地数据库连接通
+
+你今天要完成：
+
+安装 PostgreSQL
+建数据库 fleet_db
+设计四张表
+在 Spring Boot 配置 datasource
+用 JPA/hibernate 跑通表结构
+
+今天产出：
+
+后端能连数据库
+表能自动建出来
+README 增加数据库结构说明
+
+你要能回答面试问题：
+
+为什么拆成 vehicles、telemetry_records、alerts
+为什么 telemetry 要单独一张表而不是放 vehicle 里
+Day 3：Vehicle 模块 API
+
+今天目标：
+
+先做最基础的车辆管理
+
+你今天要完成：
+
+写 Vehicle entity / repository / service / controller
+做这些 API：
+GET /vehicles
+GET /vehicles/{id}
+POST /vehicles
+PUT /vehicles/{id}
+DELETE /vehicles/{id}
+
+今天产出：
+
+Postman 可以正常测 CRUD
+返回 JSON 正常
+异常情况能处理，比如找不到车辆
+
+加分点：
+
+用 DTO，不要直接把 entity 暴露出去
+Day 4：Telemetry 模块 API
+
+今天目标：
+
+让系统能接收车辆上传的数据
+
+你今天要完成：
+
+写 TelemetryRecord 模块
+做这些 API：
+POST /telemetry
+GET /vehicles/{id}/telemetry/latest
+GET /vehicles/{id}/telemetry/history
+
+你今天要注意：
+
+POST /telemetry 要校验 vehicle 是否存在
+history 查询最好支持时间倒序
+latest 查询可以只取最近一条
+
+今天产出：
+
+每辆车都能看到最新状态和历史记录
+Day 5：Alert 告警逻辑
+
+今天目标：
+
+做出“有业务味道”的核心功能
+
+你今天要完成：
+
+写 Alert 模块
+做这些 API：
+GET /alerts
+GET /vehicles/{id}/alerts
+PATCH /alerts/{id}/resolve
+
+然后加业务规则：
+
+速度 > 100，生成 OVER_SPEED
+电量 < 20，生成 LOW_BATTERY
+
+如果你还想再加一个：
+
+超过一定时间没数据，视为 OFFLINE
+
+今天产出：
+
+telemetry 上传时，系统自动判断是否生成 alert
+
+这一天很关键，因为它让你的项目从“数据展示”变成“业务系统”。
+
+Day 6：用户登录和 JWT
+
+今天目标：
+
+让项目更像正式系统
+
+你今天要完成：
+
+写 User 表
+注册一个管理员账号
+做登录接口：
+POST /auth/login
+返回 JWT
+给核心接口加鉴权
+
+至少保护这些接口：
+
+POST /vehicles
+PUT /vehicles/{id}
+DELETE /vehicles/{id}
+PATCH /alerts/{id}/resolve
+
+今天产出：
+
+没 token 不能改数据
+有 token 才能操作后台接口
+
+面试很爱问这块。
+
+Day 7：Swagger + 全局异常处理 + 代码整理
+
+今天目标：
+
+把后端工程感补起来
+
+你今天要完成：
+
+接 Swagger/OpenAPI
+加全局异常处理：
+资源不存在
+参数校验失败
+未授权
+统一返回格式
+
+今天产出：
+
+后端 API 文档可以直接访问
+错误返回不再乱七八糟
+
+你要能在 README 写：
+
+API docs 地址
+主要接口说明
+Day 8：React 前端基础页面
+
+今天目标：
+
+先把页面框架搭起来
+
+你今天要完成：
+
+React 路由
+页面结构
+Login
+Dashboard
+Vehicles
+Vehicle Detail
+Alerts
+公共导航栏
+
+今天产出：
+
+页面能跳转
+基本 UI 成型
+
+界面不用太漂亮，重点是清楚、整洁、能用。
+
+Day 9：前端接车辆列表和详情
+
+今天目标：
+
+前后端打通
+
+你今天要完成：
+
+Vehicles 页面调用 GET /vehicles
+Vehicle Detail 页面显示：
+基本信息
+最新 telemetry
+历史 telemetry
+
+今天产出：
+
+能在网页里看到真实后端数据
+可以点击某辆车进入详情页
+Day 10：前端接告警和 dashboard
+
+今天目标：
+
+做出“项目展示感”
+
+你今天要完成：
+
+Alerts 页面展示告警列表
+Dashboard 页面做几个统计卡片：
+总车辆数
+在线车辆数
+告警总数
+高危告警数
+
+可选：
+
+用简单图表展示最近一天告警数
+
+今天产出：
+
+项目已经看起来像一个小产品，而不是接口作业
+Day 11：模拟数据生成器
+
+今天目标：
+
+让项目“活起来”
+
+你今天要完成：
+
+写一个简单脚本，定时插入 telemetry 数据
+可以用：
+Java 定时任务
+Python 小脚本
+随机生成：
+经纬度
+速度
+电量
+
+今天产出：
+
+你的系统会自动出现新数据和新告警
+演示时不需要手工一条条发 Postman
+
+这是很大的加分项。
+
+Day 12：测试
+
+今天目标：
+
+补项目可信度
+
+你今天要完成：
+
+后端至少写这些测试：
+Vehicle service 单元测试
+Alert 规则测试
+一个 controller 集成测试
+如果时间不够，至少保证：
+关键 service 有测试
+告警逻辑有测试
+
+今天产出：
+
+测试能跑通
+README 里写明怎么运行测试
+
+如果你想冲 EROAD，这一步很值得做，因为 JD 明写了 testing / automation testing。
+
+Day 13：部署
+
+今天目标：
+
+把项目放到线上
+
+你今天要完成：
+
+后端部署到 Render / Railway / EC2
+前端部署到 Vercel / Netlify
+数据库放云上
+配环境变量：
+DB URL
+JWT secret
+
+今天产出：
+
+一个真实可访问的 demo 链接
+README 里有 online demo
+
+这一步会直接拉开你和其他候选人的差距。
+
+Day 14：简历包装 + README 完善 + 面试话术
+
+今天目标：
+
+把“项目”变成“求职武器”
+
+你今天要完成：
+
+README 最终版
+项目截图
+架构图
+简历项目描述
+面试回答稿
+
+README 至少要有：
+
+项目简介
+功能列表
+技术栈
+架构图
+数据库设计
+本地运行方式
+API 文档
+测试方式
+部署链接
+五、你最终至少要做出的 MVP
+
+如果你来不及做完整 14 天，那至少做出这版：
+
+最低可用版本
+登录
+车辆 CRUD
+telemetry 上传
+最新状态查询
+告警生成
+dashboard 简单统计
+PostgreSQL
+README
+部署
+
+做到这一步，已经能写进简历了。
+
+六、简历上怎么写这个项目
+
+你以后可以写成这样：
+
+Fleet Monitoring Platform
+Built a full-stack fleet monitoring system using Java Spring Boot, React, and PostgreSQL to track vehicle telemetry, generate alerts, and visualize fleet status in a dashboard.
+
+你再拆成 3 条：
+
+Designed and implemented RESTful APIs for vehicle management, telemetry ingestion, and alert handling using Spring Boot and PostgreSQL.
+Built business rules to automatically generate alerts for overspeed and low-battery events based on incoming telemetry data.
+Deployed the full-stack application to cloud infrastructure and documented the system with Swagger, README, and test coverage.
+
+这几句很像真实工程项目，不像学生作业。
+
+七、面试时你要会讲的 6 个问题
+
+你一定要提前准备这几个：
+
+1. 为什么做这个项目？
+
+回答方向：
+
+想做一个更接近真实企业场景的系统
+对 IoT / fleet / telemetry / backend system 感兴趣
+本科机器人背景和软件方向结合
+2. 最难的地方是什么？
+
+回答方向：
+
+telemetry 和 alert 的数据关系
+设计 latest/history 查询
+鉴权和错误处理
+3. 为什么这样设计数据库？
+
+回答方向：
+
+vehicle 是主体
+telemetry 是高频时序数据
+alert 是业务事件
+这样方便扩展和查询
+4. 你怎么保证代码质量？
+
+回答方向：
+
+DTO
+service/controller 分层
+全局异常处理
+单元测试
+Git 规范
+5. 如果要扩展，你会怎么做？
+
+回答方向：
+
+WebSocket 实时推送
+地图展示
+Kafka 处理高频数据
+Redis 缓存 dashboard
+6. 你在这个项目里学到了什么？
+
+回答方向：
+
+API design
+schema design
+debugging
+deployment
+business-oriented engineering thinking
+八、你千万不要犯的坑
+不要做成这样
+只有前端页面，没有后端
+只有 CRUD，没有业务逻辑
+没数据库
+没部署
+README 很烂
+项目名字很空，比如 “car app”
+代码全堆 controller 里
+一定要做到
+有业务规则
+有数据库
+有部署
+有文档
+有测试
+能讲清楚设计
+九、如果你时间更少，我给你一个 7 天压缩版
+7 天最小方案
+
+Day 1：建项目 + DB
+Day 2：Vehicle CRUD
+Day 3：Telemetry API
+Day 4：Alert logic
+Day 5：React 页面
+Day 6：部署
+Day 7：README + 简历写法
+
+十、你下一步最该做什么
+
+今天就开始这三件事：
+
+建 GitHub 仓库
+初始化 Spring Boot + React
+把数据库表先建出来
+
+这样你就已经真的启动了，不再停留在“想做项目”。
+
+如果你要，我下一条可以直接给你一份 这个项目的数据库 SQL + Spring Boot 接口清单 + GitHub README 模板。
